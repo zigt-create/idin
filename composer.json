@@ -1,5 +1,5 @@
 {
-  "name": "bankid/creditor-library",
+  "name": "kees-tm/idin",
   "description": "A PHP library for working with the BankId protocol",
   "license": "proprietary",
   "autoload": {
