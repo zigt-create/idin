@@ -70,8 +70,6 @@ class AuthenticationResponse extends Internal\TransactionResponseBase {
         $ar->rawMessage = $xml;
         $ar->get($response);
         
-        //var_dump($ar);
-        
         return $ar;
     }
     

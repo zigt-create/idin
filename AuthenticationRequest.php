@@ -9,7 +9,8 @@ class AuthenticationRequest extends Internal\TransactionRequestBase {
     protected $merchantReference;
     protected $requestedServiceID;
     protected $assuranceLevel;
-    
+    protected $documentID;
+
     /**
      * Default constructor
      */
@@ -57,6 +58,20 @@ class AuthenticationRequest extends Internal\TransactionRequestBase {
      */
     public function setAssuranceLevel($assuranceLevel) {
         $this->assuranceLevel = $assuranceLevel;
+    }
+
+    /**
+     * This fiels specified the document to be signed (Merchant.DocumentID – as a sha256 value)
+     */
+    public function getDocumentID() {
+        return $this->documentID;
+    }
+
+    /**
+     * This fiels specified the document to be signed (Merchant.DocumentID – as a sha256 value)
+     */
+    public function setDocumentID($documentID) {
+        $this->documentID = $documentID;
     }
     
     private static function getGuid() {

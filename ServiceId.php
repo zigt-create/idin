@@ -9,7 +9,7 @@ class ServiceId {
     private $value;
     
     public function setInt($value) {
-        $this->value = value;
+        $this->value = $value;
     }
     
     public function setString($value) {

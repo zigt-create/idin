@@ -52,4 +52,10 @@ class ServiceIds {
      * @var int
      */
     public static $Telephone = 4;
+
+    /**
+     * Signing Document
+     */
+    public static $Sign = 8;
+
 }

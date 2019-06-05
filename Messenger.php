@@ -26,7 +26,7 @@ class Messenger implements IMessenger {
 
         //\curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);//default is 2
         //\curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);//default is 1
-        \curl_setopt($ch, CURLOPT_CAINFO, __DIR__ . "/cacert.pem");//make senses when CURLOPT_SSL_VERIFYPEER is 1
+        \curl_setopt($ch, CURLOPT_CAINFO, __DIR__. "/cacert.pem");//make senses when CURLOPT_SSL_VERIFYPEER is 1
         
         \curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
         \curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

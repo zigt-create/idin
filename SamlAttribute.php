@@ -30,7 +30,7 @@ class SamlAttribute {
     /**
      * Get the Consumer preferred last name
      */
-    public static $ConsumerPrefLastName = "urn:nl:bvn:bankid:1.0:consumer.preflastname";
+    public static $ConsumerPrefLastName = "urn:nl:bvn:bankid:1.0:consumer.preferredlastname";
     
     /**
      * Get the Consumer's registered partner last name (analogous to legal last name)
@@ -45,7 +45,7 @@ class SamlAttribute {
     /**
      * Get the last name prefix of Consumer preferred last name (analogous to legal last name prefix)
      */
-    public static $ConsumerPrefLastNamePrefix = "urn:nl:bvn:bankid:1.0:consumer.preflastnameprefix";
+    public static $ConsumerPrefLastNamePrefix = "urn:nl:bvn:bankid:1.0:consumer.preferredlastnameprefix";
     
     /**
      * Get the initials of the Consumer
@@ -122,16 +122,6 @@ class SamlAttribute {
      */
     public static $ConsumerTelephone = "urn:nl:bvn:bankid:1.0:consumer.telephone";
 
-    /** Consumer's prefered last name
-     * @var string
-     */
-    public static $ConsumerPreferedLastName = "urn:nl:bvn:bankid:1.0:consumer.preferedlastname";
-
-    /** Consumer's Prefered Last Name Prefix
-     * @var string
-     */
-    public static $ConsumerPreferedLastNamePrefix = "urn:nl:bvn:bankid:1.0:consumer.preferedlastnameprefix";
-
     /** Consumer's Partner Last Name Prefix
      * @var string
      */
@@ -142,6 +132,11 @@ class SamlAttribute {
      */
     public static $ConsumerIntAddressLine = "urn:nl:bvn:bankid:1.0:consumer.intaddressline1/2/3";
 
+    /** Specify the document to be signed
+     * @var string
+     */
+    public static $DocumentID = "urn:nl:bvn:bankid:1.0:merchant.documentID";
+
     private $name;
     private $value;
 
@@ -149,7 +144,7 @@ class SamlAttribute {
      * @return Name of the Saml Attribute
      */
     public function getName() {
-        return name;
+        return $this->name;
     }
 
     /**

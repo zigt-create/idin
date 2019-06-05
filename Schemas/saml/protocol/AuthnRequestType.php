@@ -338,6 +338,5 @@ class AuthnRequestType extends RequestAbstractType
         return $this;
     }
 
-
 }
 

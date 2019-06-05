@@ -42,13 +42,18 @@ class Communicator {
         $this->xmlProcessor = new XmlProcessor();
         $this->logger = $this->config->getLogger();
         $this->messenger = $this->config->getMessenger();
+
+        // Log
+        $this->logger->log($this->config, get_called_class() . " initialized");
     }
 
     /**
      * Sends a directory request to the URL specified in Configuration.AcquirerUrl_DirectoryReq
      */
     public function getDirectory() {
+        $this->logger->log($this->config, "sending new directory request");
         try {
+            $this->logger->log($this->config, "building idx message");
             $idx = new IdxMessageBuilder();
             $xml = $idx->getDirectoryRequest($this->config, new Internal\DirectoryRequestBase());
             $xml = $this->xmlProcessor->addSignature($this->config, $xml);
@@ -68,7 +73,9 @@ class Communicator {
      * Sends a new authentication request to the URL specified in Configuration.AcquirerUrl_TransactionReq
      */
     public function newAuthenticationRequest($authenticationRequest) {
+        $this->logger->log($this->config, "sending new authentication request");
         try {
+            $this->logger->log($this->config, "building idx message");
             $bankid = new BankIdMessageBuilder();
             $xml = $bankid->getTransaction($this->config, $authenticationRequest);
 
@@ -92,7 +99,9 @@ class Communicator {
      * Sends a transaction status request to the URL specified in Configuration.AcquirerUrl_TransactionReq
      */
     public function getResponse($statusRequest) {
+        $this->logger->log($this->config, "sending new status request");
         try {
+            $this->logger->log($this->config, "building idx message");
             $idx = new IdxMessageBuilder();
             $xml = $idx->getStatusRequest($this->config, $statusRequest);
             $xml = $this->xmlProcessor->addSignature($this->config, $xml);
@@ -109,6 +118,9 @@ class Communicator {
     }
 
     protected function performRequest($xml, $url) {
+
+        $this->logger->log($this->config, "sending request to {$url} ");
+
         $this->xmlProcessor->verifySchema($xml);
         
         $this->logger->logXmlMessage($this->config, $xml);
@@ -116,7 +128,9 @@ class Communicator {
         $response = $this->messenger->sendMessage($xml, $url);
         
         $this->logger->logXmlMessage($this->config, $response);
-        
+
+        $this->logger->log($this->config, "Raw Response : " . $response);
+
         $this->xmlProcessor->verifySchema($response);
         
         $this->xmlProcessor->verifySignature($this->config, $response);

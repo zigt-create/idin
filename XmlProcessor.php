@@ -175,7 +175,7 @@ class XmlProcessor {
             $this->checkIdxSignature($config, $doc);
         }
     }
-    
+
     public function verifySchema($xml) {
         $doc = new \DOMDocument();
         $doc->loadXML($xml);

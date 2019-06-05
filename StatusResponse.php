@@ -95,9 +95,7 @@ class StatusResponse extends Internal\StatusResponseBase {
         $sr = new StatusResponse();
         $sr->rawMessage = $xml;
         $sr->get($config, $response);
-        
-        //var_dump($sr);
-        
+
         return $sr;
     }
     

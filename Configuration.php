@@ -90,6 +90,27 @@ class Configuration {
      * Enable/disable logging
      */
     public $LogsEnabled;
+
+    /**
+     * A directory on the disk where the library saves internal log messages.
+     */
+    public $LogsLocation;
+
+    /**
+     *  A string that describes a pattern to distinguish internal log messages.
+     *    %Y = current year
+     *    %M = current month
+     *    %D = current day
+     *    %h = current hour
+     *    %m = current minute
+     *    %s = current second
+     */
+    public $LogsPattern;
+
+     /**
+     * A file where library saves internal log messages.
+     */
+    public $LogsFileName;
     /**
      * A directory on the disk where the library saves ISO pain raw messages.
      */
@@ -97,6 +118,8 @@ class Configuration {
     /**
      * This tells the library that it should save ISO pain raw messages or not. Default is true.
      */
+
+
     public $ServiceLogsEnabled;
     /**
      *  A string that describes a pattern to distinguish the ISO pain raw messages. For example,
@@ -136,6 +159,10 @@ class Configuration {
      *      "BankId.SAML.Certificate.Password" => "password",
      *
      *      "BankId.Logs.Enabled" => true,
+     *      "BankId.Logs.Location" => "./Logs",
+     *      "BankId.Logs.Pattern" => "%Y-%M-%D/",
+     *      "BankId.Logs.FileName" => "iDIN.txt",
+     *
      *      "BankId.ServiceLogs.Enabled" => true,
      *      "BankId.ServiceLogs.Location" => "ServiceLogs",
      *      "BankId.ServiceLogs.Pattern" => "%Y-%M-%D/%h%m%s.%f-%a.xml",
@@ -197,6 +224,20 @@ class Configuration {
             if (isset($options['BankId.Logs.Enabled'])) {
                 $this->LogsEnabled = $options['BankId.Logs.Enabled'];
             }
+            if (isset($options['BankId.Logs.Pattern'])) {
+                $this->LogsPattern = $options['BankId.Logs.Pattern'];
+            }
+            if (isset($options['BankId.Logs.FileName'])) {
+                $this->LogsFileName = $options['BankId.Logs.FileName'];
+            }
+            if (isset($options['BankId.Logs.Location'])) {
+                $this->LogsLocation = $options['BankId.Logs.Location'];
+            }
+
+
+
+
+
             if (isset($options['BankId.ServiceLogs.Enabled'])) {
                 $this->ServiceLogsEnabled = $options['BankId.ServiceLogs.Enabled'];
             }
@@ -206,6 +247,8 @@ class Configuration {
             if (isset($options['BankId.ServiceLogs.Pattern'])) {
                 $this->ServiceLogsPattern = $options['BankId.ServiceLogs.Pattern'];
             }
+
+
 
             if (isset($this->MerchantCertificateFile) && isset($this->RoutingServiceCertificateFile) && isset($this->SamlCertificateFile)) {
                 $this->loadCertificates();
@@ -255,6 +298,11 @@ class Configuration {
                         $samlCertificate,
                         $samlCertificatePassword,
 
+                        $logsEnabled,
+                        $logsPattern,
+                        $logsFileName,
+                        $logsLocation,
+
                         $serviceLogsLocation,
                         $serviceLogsEnabled,
                         $serviceLogsPattern){
@@ -271,6 +319,12 @@ class Configuration {
         $this->SamlCertificateFile = $samlCertificateFile;
         $this->MerchantCertificatePassword = $merchantCertificatePassword;
         $this->SamlCertificatePassword = $samlCertificatePassword;
+
+        $this->LogsEnabled = $logsEnabled;
+        $this->LogsPattern = $logsPattern;
+        $this->LogsFileName = $logsFileName;
+        $this->LogsLocation = $logsLocation;
+
         $this->ServiceLogsEnabled = $serviceLogsEnabled;
         $this->ServiceLogsLocation = $serviceLogsLocation;
         $this->ServiceLogsPattern = $serviceLogsPattern;
@@ -358,8 +412,12 @@ class Configuration {
                 case 'BankId.RoutingService.Certificate.File.Alternative': self::defaultInstance()->RoutingServiceCertificateFileAlternative = $value; break;
                 case 'BankId.SAML.Certificate.File': self::defaultInstance()->SamlCertificateFile = $value; break;
                 case 'BankId.SAML.Certificate.Password': self::defaultInstance()->SamlCertificatePassword = $value; break;
-                
+
                 case 'BankId.Logs.Enabled': self::defaultInstance()->LogsEnabled = $value; break;
+                case 'BankId.Logs.Pattern': self::defaultInstance()->LogsPattern = $value; break;
+                case 'BankId.Logs.FileName': self::defaultInstance()->LogsFileName = $value; break;
+                case 'BankId.Logs.Location': self::defaultInstance()->LogsLocation = $value; break;
+
                 case 'BankId.ServiceLogs.Enabled': self::defaultInstance()->ServiceLogsEnabled = $value; break;
                 case 'BankId.ServiceLogs.Location': self::defaultInstance()->ServiceLogsLocation = $value; break;
                 case 'BankId.ServiceLogs.Pattern': self::defaultInstance()->ServiceLogsPattern = $value; break;

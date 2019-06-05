@@ -3,7 +3,7 @@
 namespace BankId\Merchant\Library\Validation;
 
 use BankId\Merchant\Library\SamlAttribute;
-// use BankId\Merchant\Library\ServiceIds;
+use BankId\Merchant\Library\ServiceIds;
 use BankId\Merchant\Library\Utils;
 
 /**
@@ -26,19 +26,22 @@ class Validator {
 
     protected static $BankId_MerchantReference = '[a-zA-Z][a-zA-Z0-9]{0,34}';
 
-    protected static $BankId_LOA = 'nl:bvn:bankid:1.0:loa[2-3]{1}';
+    protected static $BankId_LOA = 'nl:bvn:bankid:1.0:loa3{1}';
 
     protected static $BankId_TransactionID = '[0-9]{16}';
-    
+
+    protected static $DocumentId = '[a-zA-Z0-9]{0,256}';
+
+
     /**
      * Validates a directory request object
      * @param dirReq the object to validate
-     * @throws CommunicatorException 
+     * @throws CommunicatorException
      */
     public static function validateDirectoryReq($dirReq) {
         self::checkByValue($dirReq->getCreateDateTimestamp(), self::$DateTimestamp);
     }
-    
+
     /**
      * Validates a directory response object
      * @param dirRes the object to validate
@@ -103,9 +106,11 @@ class Validator {
         self::checkByValue($authnReq->getID(), self::$BankId_MerchantReference);
         self::checkUrl($authnReq->getAssertionConsumerServiceURL());
         self::checkByValue($authnReq->getRequestedAuthnContext()->getAuthnContextClassRef()[0], self::$BankId_LOA);
+        self::checkByValue($authnReq->getRequestedAuthnContext()->getAuthnContextClassRef()[1], self::$DocumentId);
         self::checkByValueValidation($authnReq->getAttributeConsumingServiceIndex(), function($value) {
             return self::checkBankIdServiceId($value);
         });
+        self::checkSignService($authnReq->getRequestedAuthnContext()->getAuthnContextClassRef()[1], $authnReq->getAttributeConsumingServiceIndex());
     }
     
     /**
@@ -115,6 +120,7 @@ class Validator {
      */
     public static function validateSamlResponse($accRep) {
         foreach ($accRep->getAttributes() as $attrKey => $attrValue) {
+
             switch ($attrKey) {
 
                 case SamlAttribute::$ConsumerBin:
@@ -139,7 +145,7 @@ class Validator {
                     self::checkByValue($attrValue, '[[:print:]]{1,28}');
                     break;
                 case SamlAttribute::$ConsumerInitials:
-                    self::checkByValue($attrValue, '[A-Z]{1,24}');
+                    self::checkByValue($attrValue, '^[\p{Lu}]{1,24}');
                     break;
                 case SamlAttribute::$ConsumerDateOfBirth:
                     self::checkByValue($attrValue, '\d\d\d\d(0[0-9]|1[012])(0[0-9]|[12][0-9]|3[01])');
@@ -168,13 +174,13 @@ class Validator {
                 case SamlAttribute::$ConsumerIs18OrOlder:
                     self::checkByValue($attrValue, 'true|false');
                     break;
-                case SamlAttribute::$ConsumerPreferedLastName:
+                case SamlAttribute::$ConsumerPrefLastName:
                     self::checkByValue($attrValue, '[[:print:]]{1,200}');
                     break;
                 case SamlAttribute::$ConsumerPartnerLastName:
                     self::checkByValue($attrValue, '[[:print:]]{1,200}');
                     break;
-                case SamlAttribute::$ConsumerPreferedLastNamePrefix:
+                case SamlAttribute::$ConsumerPrefLastNamePrefix:
                     self::checkByValue($attrValue, '[[:print:]]{1,10}');
                     break;
                 case SamlAttribute::$ConsumerPartnerLastNamePrefix:
@@ -189,7 +195,9 @@ class Validator {
                 case SamlAttribute::$ConsumerEmail:
                     self::checkByValue($attrValue, '[[:print:]]{1,255}');
                     break;
-                
+                case SamlAttribute::$DocumentID:
+                    self::checkByValue($attrValue, '[[:print:]]{1,255}');
+                    break;
             }
         }
     }
@@ -219,13 +227,17 @@ class Validator {
             return FALSE;
         }
     }
-    
+
     protected static function checkUrl($value) {
         if (filter_var($value, FILTER_VALIDATE_URL)) {
             return TRUE;
-        }
-        else {
-            throw new \BankId\Merchant\Library\CommunicatorException("malformed url");
+        } else {
+            $pattern = "/^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/";
+            if (preg_match($pattern, $value)) {
+                return TRUE;
+            } else {
+                throw new \BankId\Merchant\Library\CommunicatorException("malformed url");
+            }
         }
     }
     
@@ -242,6 +254,37 @@ class Validator {
                 | ServiceIds::$DateOfBirth | ServiceIds::$Gender | ServiceIds::$BSN;
 
         return ((~$compositeValues & $value) == 0);*/
+
+        return TRUE;
+    }
+
+    /**
+     * @param $DocumentId
+     * @param $ServiceId
+     * @return bool
+     * @throws \BankId\Merchant\Library\CommunicatorException
+     */
+    protected static function checkSignService($DocumentId, $ServiceId) {
+
+        $ServiceId = intval($ServiceId, 10);
+
+        if ($ServiceId === ServiceIds::$Sign && empty($DocumentId)) {
+            throw new \BankId\Merchant\Library\CommunicatorException("DocumentID should be present");
+        }
+
+        $compositeValues =
+            ServiceIds::$None | ServiceIds::$ConsumerTransientId | ServiceIds::$ConsumerBin
+            | ServiceIds::$Name | ServiceIds::$Address | ServiceIds::$IsEighteenOrOlder
+            | ServiceIds::$DateOfBirth | ServiceIds::$Gender | ServiceIds::$BSN
+            | ServiceIds::$Email | ServiceIds::$Telephone;
+
+        if( ($ServiceId != ServiceIds::$Sign) && ((~$compositeValues & $ServiceId) == ServiceIds::$Sign) ) {
+            throw new \BankId\Merchant\Library\CommunicatorException("Sign cannot be combined with other services");
+        }
+
+        if ($ServiceId !== ServiceIds::$Sign && !empty($DocumentId)) {
+            throw new \BankId\Merchant\Library\CommunicatorException("DocumentID should not be filled if the Sign service is not requested");
+        }
 
         return TRUE;
     }

@@ -58,8 +58,8 @@ class Utils {
             $trxReq->getMerchant()->getMerchantID()));
         $Merchant->appendChild($dom->createElementNS(self::NS_BANKID, 'subID',
             $trxReq->getMerchant()->getSubID()));
-        $Merchant->appendChild($dom->createElementNS(self::NS_BANKID, 'merchantReturnURL',
-            $trxReq->getMerchant()->getMerchantReturnURL()));
+        $Merchant->appendChild($merchantReturnURLXML = $dom->createElement('merchantReturnURL'));
+            $merchantReturnURLXML->appendChild($dom->createTextNode( $trxReq->getMerchant()->getMerchantReturnURL() ));
         $AcquirerTrxReq->appendChild($Merchant);
         
         $Transaction = $dom->createElementNS(self::NS_BANKID, 'Transaction');
@@ -101,7 +101,20 @@ class Utils {
         
         $AuthnRequest->appendChild($dom->createElementNS(self::NS_ASSERTION, 'saml:Issuer',
             $authnReq->getIssuer()->value()));
-        
+
+        if(!empty($authnReq->getExtensions()->getAttribute()[0])) {
+            $Extensions = $dom->createElementNS(self::NS_ASSERTION, 'saml:Extensions', '');
+
+            $Attribute = $dom->createElementNS(self::NS_ASSERTION, 'saml:Attribute', '');
+            $Attribute->setAttribute('Name', $authnReq->getExtensions()->getName());
+
+            $AttributeValue = $dom->createElementNS(self::NS_ASSERTION, 'saml:AttributeValue', $authnReq->getExtensions()->getAttribute()[0]);
+
+            $Attribute->appendChild($AttributeValue);
+            $Extensions->appendChild($Attribute);
+            $AuthnRequest->appendChild($Extensions);
+        }
+
         $AuthnRequest->appendChild($dom->createElementNS(self::NS_ASSERTION, 'saml:Conditions',
             ''));
         
@@ -116,6 +129,7 @@ class Utils {
             ''));
         
         $dom->formatOutput = TRUE;
+
         return $dom;
     }
     
@@ -140,6 +154,7 @@ class Utils {
         $Transaction = $dom->createElementNS(self::NS_BANKID, 'Transaction');
         $Transaction->appendChild($dom->createElementNS(self::NS_BANKID, 'transactionID',
             $stsReq->getTransaction()->getTransactionID()));
+
         $AcquirerStatusReq->appendChild($Transaction);
         
         $dom->formatOutput = TRUE;

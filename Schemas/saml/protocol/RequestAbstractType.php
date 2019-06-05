@@ -227,6 +227,5 @@ class RequestAbstractType
         return $this;
     }
 
-
 }
 

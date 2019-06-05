@@ -31,8 +31,35 @@ class Logger implements ILogger {
      * @param $message
      */
     public function log(Configuration $config, $message) {
-        if ($config->LogsEnabled) {
-            error_log($message, 0);
+        if ($config->LogsEnabled) 
+        {
+            // error_log($message, 0);
+
+            $callers = debug_backtrace();
+            $function = $callers[1]['function'];
+
+            $filename = $config->LogsFileName;
+            $now = new \DateTime();
+            $msec = substr(explode(' ', \microtime())[0], 2, 3);
+            
+            $logs_subdir = $config->LogsPattern;
+
+            $logs_subdir = str_replace('%Y', $now->format('Y'), $logs_subdir);
+            $logs_subdir = str_replace('%M', $now->format('m'), $logs_subdir);
+            $logs_subdir = str_replace('%D', $now->format('d'), $logs_subdir);
+            $logs_subdir = str_replace('%h', $now->format('H'), $logs_subdir);
+            $logs_subdir = str_replace('%m', $now->format('i'), $logs_subdir);
+            $logs_subdir = str_replace('%s', $now->format('s'), $logs_subdir);
+            $logs_subdir = str_replace('%f', $msec, $logs_subdir);
+            $logs_subdir = str_replace('%a', '', $logs_subdir);
+            
+            $full_path = join(DIRECTORY_SEPARATOR, array($config->LogsLocation, $logs_subdir, $filename));
+            
+            if (!file_exists(dirname($full_path))) {
+                mkdir(dirname($full_path), 0700, TRUE);
+            }
+
+            file_put_contents($full_path, date('Y-m-d H:i:s : ') . $function . '() - ' . $message . "\n", FILE_APPEND);
         }
     }
 
