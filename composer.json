@@ -1,5 +1,5 @@
 {
-  "name": "kees-tm/idin",
+  "name": "estdigital/idin",
   "description": "A PHP library for working with the BankId protocol",
   "license": "proprietary",
   "autoload": {
