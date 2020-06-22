@@ -52,6 +52,26 @@ class XmlProcessor {
         
         return $doc->saveXML();
     }
+
+    protected function propagateInclusiveNamespaces($src_document,$document) {
+
+        $inclusiveNamespaceNode = $document->getElementsByTagName ('InclusiveNamespaces');
+        foreach ($inclusiveNamespaceNode as $key => $node) {
+            if(!empty($node->attributes->item(0)->nodeValue)) {
+
+                $prefixes = explode(" ", $node->attributes->item(0)->nodeValue);
+                foreach ($prefixes as $key_prefix => $prefix) {
+                    $document->documentElement->setAttributeNS(
+                        Utils::NS_URI,
+                        'xmlns:' . $prefix,
+                        $src_document->lookupNamespaceUri($prefix)
+                    );
+                }
+            }
+        }
+
+        return $document;
+    }
     
     private function checkBankIdSignature($doc) {
 
@@ -59,7 +79,9 @@ class XmlProcessor {
         $bankidDoc = new \DOMDocument();
         $root = $this->propagateNamespaces($bankidRoot, $bankidDoc);
         $bankidDoc->loadXML($bankidDoc->saveXML($root));
-        
+
+        $bankidDoc=$this->propagateInclusiveNamespaces($bankidRoot,$bankidDoc);
+
         $signature = new XMLSecurityDSig();
         $signature->locateSignature($bankidDoc);
         $signature->canonicalizeSignedInfo();
@@ -164,8 +186,10 @@ class XmlProcessor {
     }
     
     public function verifySignature(Configuration $config, $xml) {
+        $oldValue = libxml_disable_entity_loader(true);
         $doc = new \DOMDocument();
         $doc->loadXML($xml);
+        libxml_disable_entity_loader($oldValue);
         
         if ($doc->getElementsByTagName('Signature')->length == 2) {
             $this->checkBankIdSignature($doc);
@@ -177,8 +201,10 @@ class XmlProcessor {
     }
 
     public function verifySchema($xml) {
+        $oldValue = libxml_disable_entity_loader(true);
         $doc = new \DOMDocument();
         $doc->loadXML($xml);
+        libxml_disable_entity_loader($oldValue);
         
         libxml_use_internal_errors(TRUE);
         

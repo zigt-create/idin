@@ -39,8 +39,7 @@ class StatusResponse extends Internal\StatusResponseBase {
         
         if (strcasecmp($this->status, self::$Success) == 0) {
             $this->statusDateTimestamp = (string)$stsRes->Transaction->statusDateTimestamp;
-            $samlResponse = SamlResponse::parse(
-                $config, $stsRes->Transaction->container->children(Utils::NS_PROTOCOL)->Response);
+            $samlResponse = SamlResponse::parse($config, $stsRes);
             Validation\Validator::validateSamlResponse($samlResponse);
             $this->samlResponse = $samlResponse;
             
@@ -81,6 +80,7 @@ class StatusResponse extends Internal\StatusResponseBase {
     }
     
     public static function parse(Configuration $config, $xml) {
+        $oldValue = libxml_disable_entity_loader(true);
         $res = new \SimpleXMLElement($xml);
         $response = NULL;
         
@@ -95,6 +95,8 @@ class StatusResponse extends Internal\StatusResponseBase {
         $sr = new StatusResponse();
         $sr->rawMessage = $xml;
         $sr->get($config, $response);
+
+        libxml_disable_entity_loader($oldValue);
 
         return $sr;
     }
