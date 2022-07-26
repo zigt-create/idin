@@ -1,5 +1,5 @@
 {
-  "name": "estdigital/idin",
+  "name": "zigt/idin",
   "description": "A PHP library for working with the BankId protocol",
   "license": "proprietary",
   "autoload": {
@@ -11,7 +11,7 @@
     }
   },
   "require": {
-    "php": ">= 5.4",
+    "php": ">= 8.0",
     "robrichards/xmlseclibs": "^3.0"
   },
   "suggest": {
